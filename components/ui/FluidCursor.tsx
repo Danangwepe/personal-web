@@ -8,7 +8,7 @@ const FluidCursor = () => {
     return (
         <canvas
             id="fluid-canvas"
-            className="fixed inset-0 pointer-events-none z-0 h-full w-full"
+            className="fixed inset-0 pointer-events-none z-[999] h-full w-full"
         />
     );
 };

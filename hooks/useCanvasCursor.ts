@@ -1,141 +1,199 @@
-import { useEffect } from "react";
+// @ts-nocheck
+
+import { useEffect } from 'react';
 
 const useCanvasCursor = () => {
-    useEffect(() => {
-        const canvas = document.getElementById("canvas") as HTMLCanvasElement;
-        if (!canvas) return;
+    function n(e) {
+        this.init(e || {});
+    }
+    n.prototype = {
+        init: function (e) {
+            this.phase = e.phase || 0;
+            this.offset = e.offset || 0;
+            this.frequency = e.frequency || 0.001;
+            this.amplitude = e.amplitude || 1;
+        },
+        update: function () {
+            return (
+                (this.phase += this.frequency),
+                (e = this.offset + Math.sin(this.phase) * this.amplitude)
+            );
+        },
+        value: function () {
+            return e;
+        },
+    };
 
-        const ctx = canvas.getContext("2d");
-        if (!ctx) return;
+    function Line(e) {
+        this.init(e || {});
+    }
 
-        let width = (canvas.width = window.innerWidth);
-        let height = (canvas.height = window.innerHeight);
-
-        let lines: Line[] = [];
-        const gap = 40;
-        const conf = {
-            lineLength: 70,
-            speed: 0.1,
-            color: "0, 240, 255", // Electric Blue
-            size: 1.5,
-        };
-
-        class Line {
-            x: number;
-            y: number;
-            width: number;
-            height: number;
-            angle: number;
-            speed: number;
-
-            constructor(x: number, y: number) {
-                this.x = x;
-                this.y = y;
-                this.width = conf.size;
-                this.height = Math.random() * conf.lineLength;
-                this.angle = Math.random() * 360;
-                this.speed = Math.random() * conf.speed * (Math.random() < 0.5 ? -1 : 1);
+    Line.prototype = {
+        init: function (e) {
+            this.spring = e.spring + 0.1 * Math.random() - 0.02;
+            this.friction = E.friction + 0.01 * Math.random() - 0.002;
+            this.nodes = [];
+            for (var t, n = 0; n < E.size; n++) {
+                t = new Node();
+                t.x = pos.x;
+                t.y = pos.y;
+                this.nodes.push(t);
             }
-
-            draw() {
-                if (!ctx) return;
-                ctx.save();
-                ctx.translate(this.x, this.y);
-                ctx.rotate((this.angle * Math.PI) / 180);
-                ctx.fillStyle = `rgba(${conf.color}, ${(this.height / conf.lineLength) * 0.5})`;
-                // Draw a simple glowing line
-                ctx.fillRect(0, 0, this.width, this.height);
-                ctx.restore();
+        },
+        update: function () {
+            var e = this.spring,
+                t = this.nodes[0];
+            t.vx += (pos.x - t.x) * e;
+            t.vy += (pos.y - t.y) * e;
+            for (var n, i = 0, a = this.nodes.length; i < a; i++)
+                (t = this.nodes[i]),
+                    0 < i &&
+                    ((n = this.nodes[i - 1]),
+                        (t.vx += (n.x - t.x) * e),
+                        (t.vy += (n.y - t.y) * e),
+                        (t.vx += n.vx * E.dampening),
+                        (t.vy += n.vy * E.dampening)),
+                    (t.vx *= this.friction),
+                    (t.vy *= this.friction),
+                    (t.x += t.vx),
+                    (t.y += t.vy),
+                    (e *= E.tension);
+        },
+        draw: function () {
+            var e,
+                t,
+                n = this.nodes[0].x,
+                i = this.nodes[0].y;
+            ctx.beginPath();
+            ctx.moveTo(n, i);
+            for (var a = 1, o = this.nodes.length - 2; a < o; a++) {
+                e = this.nodes[a];
+                t = this.nodes[a + 1];
+                n = 0.5 * (e.x + t.x);
+                i = 0.5 * (e.y + t.y);
+                ctx.quadraticCurveTo(e.x, e.y, n, i);
             }
+            e = this.nodes[a];
+            t = this.nodes[a + 1];
+            ctx.quadraticCurveTo(e.x, e.y, t.x, t.y);
+            ctx.stroke();
+            ctx.closePath();
+        },
+    };
 
-            update() {
-                this.angle += this.speed;
-            }
+    function onMousemove(e) {
+        function o() {
+            lines = [];
+            for (var e = 0; e < E.trails; e++)
+                lines.push(new Line({ spring: 0.4 + (e / E.trails) * 0.025 }));
         }
-
-        // Instead of lines, let's do a trail effect on mouse move.
-        // The above was for background rain/matrix.
-        // Let's switch to a cursor trail.
-
-        // Reset canvas for trail
-
-        let pointer = { x: width / 2, y: height / 2 };
-
-        const handleMove = (e: MouseEvent) => {
-            pointer.x = e.clientX;
-            pointer.y = e.clientY;
-            // Add particle
-            particles.push(new Particle(pointer.x, pointer.y));
-        };
-
-        class Particle {
-            x: number;
-            y: number;
-            color: string;
-            size: number;
-            vx: number;
-            vy: number;
-            life: number;
-            maxLife: number;
-
-            constructor(x: number, y: number) {
-                this.x = x;
-                this.y = y;
-                this.color = `rgba(0, 240, 255, 1)`;
-                this.size = Math.random() * 3 + 1;
-                this.vx = (Math.random() - 0.5) * 2;
-                this.vy = (Math.random() - 0.5) * 2;
-                this.life = 0;
-                this.maxLife = 50;
-            }
-
-            update() {
-                this.x += this.vx;
-                this.y += this.vy;
-                this.life++;
-                this.size -= 0.05;
-            }
-
-            draw() {
-                if (!ctx) return;
-                ctx.fillStyle = `rgba(0, 240, 255, ${1 - this.life / this.maxLife})`;
-                ctx.beginPath();
-                ctx.arc(this.x, this.y, Math.max(0, this.size), 0, Math.PI * 2);
-                ctx.fill();
-            }
+        function c(e) {
+            e.touches
+                ? ((pos.x = e.touches[0].pageX), (pos.y = e.touches[0].pageY))
+                : ((pos.x = e.clientX), (pos.y = e.clientY)),
+                e.preventDefault();
         }
+        function l(e) {
+            1 == e.touches.length &&
+                ((pos.x = e.touches[0].pageX), (pos.y = e.touches[0].pageY));
+        }
+        document.removeEventListener('mousemove', onMousemove),
+            document.removeEventListener('touchstart', onMousemove),
+            document.addEventListener('mousemove', c),
+            document.addEventListener('touchmove', c),
+            document.addEventListener('touchstart', l),
+            c(e),
+            o(),
+            render();
+    }
 
-        let particles: Particle[] = [];
+    function render() {
+        if (ctx.running) {
+            ctx.globalCompositeOperation = 'source-over';
+            ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+            ctx.globalCompositeOperation = 'lighter';
+            ctx.strokeStyle = 'hsla(' + Math.round(f.update()) + ',50%,50%,0.2)';
+            ctx.lineWidth = 1;
+            for (var e, t = 0; t < E.trails; t++) {
+                (e = lines[t]).update();
+                e.draw();
+            }
+            ctx.frame++;
+            window.requestAnimationFrame(render);
+        }
+    }
 
-        const render = () => {
-            ctx.clearRect(0, 0, width, height);
+    function resizeCanvas() {
+        ctx.canvas.width = window.innerWidth - 20;
+        ctx.canvas.height = window.innerHeight;
+    }
 
-            particles.forEach((p, index) => {
-                p.update();
-                p.draw();
-                if (p.life > p.maxLife || p.size <= 0) {
-                    particles.splice(index, 1);
-                }
-            });
-
-            requestAnimationFrame(render);
+    var ctx,
+        f,
+        e = 0,
+        pos = {},
+        lines = [],
+        E = {
+            debug: true,
+            friction: 0.5,
+            trails: 20,
+            size: 50,
+            dampening: 0.25,
+            tension: 0.98,
         };
+    function Node() {
+        this.x = 0;
+        this.y = 0;
+        this.vy = 0;
+        this.vx = 0;
+    }
 
-        window.addEventListener("resize", () => {
-            width = canvas.width = window.innerWidth;
-            height = canvas.height = window.innerHeight;
+    const renderCanvas = function () {
+        ctx = document.getElementById('canvas').getContext('2d');
+        ctx.running = true;
+        ctx.frame = 1;
+        f = new n({
+            phase: Math.random() * 2 * Math.PI,
+            amplitude: 85,
+            frequency: 0.0015,
+            offset: 285,
         });
+        document.addEventListener('mousemove', onMousemove);
+        document.addEventListener('touchstart', onMousemove);
+        document.body.addEventListener('orientationchange', resizeCanvas);
+        window.addEventListener('resize', resizeCanvas);
+        window.addEventListener('focus', () => {
+            if (!ctx.running) {
+                ctx.running = true;
+                render();
+            }
+        });
+        window.addEventListener('blur', () => {
+            ctx.running = true;
+        });
+        resizeCanvas();
+    };
 
-        window.addEventListener("mousemove", handleMove);
-
-        render();
+    useEffect(() => {
+        renderCanvas();
 
         return () => {
-            window.removeEventListener("mousemove", handleMove);
+            ctx.running = false;
+            document.removeEventListener('mousemove', onMousemove);
+            document.removeEventListener('touchstart', onMousemove);
+            document.body.removeEventListener('orientationchange', resizeCanvas);
+            window.removeEventListener('resize', resizeCanvas);
+            window.removeEventListener('focus', () => {
+                if (!ctx.running) {
+                    ctx.running = true;
+                    render();
+                }
+            });
+            window.removeEventListener('blur', () => {
+                ctx.running = true;
+            });
         };
     }, []);
-
-    return null;
 };
 
 export default useCanvasCursor;
