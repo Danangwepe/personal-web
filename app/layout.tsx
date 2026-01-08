@@ -1,5 +1,6 @@
 import { Navbar } from "@/components/layout/Navbar";
-import FluidCursor from "@/components/ui/FluidCursor";
+import { ThemeProvider } from "@/components/providers/theme-provider";
+import CanvasCursor from "@/components/ui/CanvasCursor";
 import SmoothScroll from "@/components/ui/SmoothScroll";
 import { cn } from "@/lib/utils";
 import type { Metadata } from "next";
@@ -23,13 +24,15 @@ export default function RootLayout({
     children: React.ReactNode;
 }>) {
     return (
-        <html lang="en" className="dark">
+        <html lang="en" suppressHydrationWarning>
             <body className={cn(poppins.variable, "font-sans bg-background text-foreground antialiased selection:bg-primary/30 selection:text-primary")}>
-                <SmoothScroll>
-                    <FluidCursor />
-                    <Navbar />
-                    {children}
-                </SmoothScroll>
+                <ThemeProvider attribute="class" defaultTheme="dark" enableSystem disableTransitionOnChange>
+                    <SmoothScroll>
+                        <Navbar />
+                        {children}
+                        <CanvasCursor />
+                    </SmoothScroll>
+                </ThemeProvider>
             </body>
         </html>
     );

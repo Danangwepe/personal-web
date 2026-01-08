@@ -6,7 +6,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 
 /* ----------------------------------
-   Rotating Typewriter Component
+   Rotating Typewriter
 ----------------------------------- */
 const RotatingTypewriter = ({
     texts,
@@ -28,49 +28,29 @@ const RotatingTypewriter = ({
         let timeout: NodeJS.Timeout;
 
         if (!isDeleting && displayText.length < currentText.length) {
-            // Typing
-            timeout = setTimeout(() => {
-                setDisplayText(
-                    currentText.slice(0, displayText.length + 1)
-                );
-            }, typingSpeed);
+            timeout = setTimeout(
+                () => setDisplayText(currentText.slice(0, displayText.length + 1)),
+                typingSpeed
+            );
         } else if (!isDeleting && displayText.length === currentText.length) {
-            // Pause before deleting
-            timeout = setTimeout(() => {
-                setIsDeleting(true);
-            }, pauseTime);
+            timeout = setTimeout(() => setIsDeleting(true), pauseTime);
         } else if (isDeleting && displayText.length > 0) {
-            // Deleting
-            timeout = setTimeout(() => {
-                setDisplayText(
-                    currentText.slice(0, displayText.length - 1)
-                );
-            }, deletingSpeed);
+            timeout = setTimeout(
+                () => setDisplayText(currentText.slice(0, displayText.length - 1)),
+                deletingSpeed
+            );
         } else if (isDeleting && displayText.length === 0) {
-            // Next word
             setIsDeleting(false);
             setTextIndex((prev) => (prev + 1) % texts.length);
         }
 
         return () => clearTimeout(timeout);
-    }, [
-        displayText,
-        isDeleting,
-        textIndex,
-        texts,
-        typingSpeed,
-        deletingSpeed,
-        pauseTime,
-    ]);
+    }, [displayText, isDeleting, textIndex, texts, typingSpeed, deletingSpeed, pauseTime]);
 
     return (
         <span className="inline-flex items-center">
-            <span className="text-white font-medium">
-                {displayText}
-            </span>
-            <span className="ml-1 animate-pulse text-primary font-bold">
-                |
-            </span>
+            <span className="text-foreground font-medium">{displayText}</span>
+            <span className="ml-1 animate-pulse text-primary font-bold">|</span>
         </span>
     );
 };
@@ -80,31 +60,67 @@ const RotatingTypewriter = ({
 ----------------------------------- */
 export function HeroSection() {
     return (
-        <section className="min-h-screen flex flex-col items-center justify-center relative overflow-hidden px-6 pt-20 z-10">
-            {/* Background ambience */}
-            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[500px] h-[500px] bg-primary/20 blur-[120px] rounded-full -z-10" />
+        <section className="relative min-h-screen flex items-center justify-center overflow-hidden px-6 pt-20">
 
-            <div className="max-w-5xl mx-auto text-center z-10 space-y-8">
-                {/* Heading */}
+            {/* 🌌 Animated Background Grid */}
+            <div
+                className="absolute inset-0 bg-[linear-gradient(to_right,theme(colors.border)_1px,transparent_1px),linear-gradient(to_bottom,theme(colors.border)_1px,transparent_1px)] bg-[size:40px_40px] opacity-[0.15] dark:opacity-[0.08]"
+            />
+
+            {/* ✨ Floating Gradient Orbs */}
+            <motion.div
+                animate={{ y: [0, -30, 0], x: [0, 20, 0] }}
+                transition={{ duration: 18, repeat: Infinity, ease: "easeInOut" }}
+                className="absolute top-20 left-1/4 w-[420px] h-[420px] bg-primary/25 blur-[140px] rounded-full"
+            />
+
+            <motion.div
+                animate={{ y: [0, 40, 0], x: [0, -20, 0] }}
+                transition={{ duration: 22, repeat: Infinity, ease: "easeInOut" }}
+                className="absolute bottom-20 right-1/4 w-[360px] h-[360px] bg-cyan-400/20 blur-[140px] rounded-full"
+            />
+
+            {/* 🌠 Particle dots */}
+            <div className="absolute inset-0 pointer-events-none">
+                {[...Array(20)].map((_, i) => (
+                    <motion.span
+                        key={i}
+                        className="absolute w-1 h-1 bg-primary/40 rounded-full"
+                        style={{
+                            top: `${Math.random() * 100}%`,
+                            left: `${Math.random() * 100}%`,
+                        }}
+                        animate={{ opacity: [0.2, 0.8, 0.2] }}
+                        transition={{
+                            duration: 4 + Math.random() * 6,
+                            repeat: Infinity,
+                            ease: "easeInOut",
+                        }}
+                    />
+                ))}
+            </div>
+
+            {/* 🌟 Content */}
+            <div className="relative z-10 max-w-5xl mx-auto text-center space-y-8">
+
                 <motion.div
-                    initial={{ opacity: 0, y: 20 }}
+                    initial={{ opacity: 0, y: 30 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.8, ease: "easeOut" }}
+                    transition={{ duration: 0.9 }}
                     className="space-y-4"
                 >
                     <h2 className="text-sm md:text-base text-primary tracking-widest uppercase font-semibold">
                         Hello, I am
                     </h2>
 
-                    <h1 className="text-3xl md:text-7xl lg:text-7xl font-bold tracking-tight text-white leading-tight">
+                    <h1 className="text-3xl md:text-7xl font-bold tracking-tight leading-tight">
                         DANANG WAHYU <br className="hidden md:block" />
-                        <span className="text-transparent bg-clip-text bg-gradient-to-r from-white via-gray-200 to-gray-400">
+                        <span className="text-transparent bg-clip-text bg-gradient-to-r from-foreground via-muted-foreground to-foreground/50">
                             PRASEKTIYO
                         </span>
                     </h1>
 
-                    {/* Rotating Typewriter */}
-                    <div className="h-12 md:h-16 text-xl md:text-3xl lg:text-4xl text-gray-400 font-medium overflow-hidden">
+                    <div className="h-12 md:h-16 text-xl md:text-3xl text-muted-foreground font-medium">
                         <span className="mr-2">Interested in</span>
                         <RotatingTypewriter
                             texts={[
@@ -116,17 +132,15 @@ export function HeroSection() {
                     </div>
                 </motion.div>
 
-                {/* Description */}
                 <motion.p
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
-                    transition={{ delay: 2.5, duration: 1 }}
-                    className="max-w-2xl mx-auto text-gray-500 text-base md:text-lg leading-relaxed"
+                    transition={{ delay: 2.4, duration: 1 }}
+                    className="max-w-2xl mx-auto text-muted-foreground text-base md:text-lg leading-relaxed"
                 >
                     Learning by analyzing data, building models, and exploring Machine Learning, Data Science, and Artificial Intelligence.
                 </motion.p>
 
-                {/* CTA */}
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -135,24 +149,18 @@ export function HeroSection() {
                 >
                     <Link
                         href="#projects"
-                        className="group relative px-8 py-3 bg-white text-black font-semibold rounded-full hover:bg-gray-100 transition-all flex items-center gap-2"
+                        className="group px-8 py-3 bg-foreground text-background font-semibold rounded-full flex items-center gap-2 hover:bg-foreground/90 transition"
                     >
                         View My Work
-                        <ArrowRight
-                            size={18}
-                            className="group-hover:translate-x-1 transition-transform"
-                        />
+                        <ArrowRight className="group-hover:translate-x-1 transition-transform" size={18} />
                     </Link>
 
                     <Link
-                        href="/resume.pdf"
-                        className="group px-8 py-3 border border-white/20 text-white font-semibold rounded-full hover:bg-white/5 transition-all flex items-center gap-2"
+                        href="/profile/resume.pdf"
+                        className="group px-8 py-3 border border-border rounded-full font-semibold flex items-center gap-2 hover:bg-foreground/5 transition"
                     >
                         Download Resume
-                        <Download
-                            size={18}
-                            className="group-hover:translate-y-1 transition-transform"
-                        />
+                        <Download className="group-hover:translate-y-1 transition-transform" size={18} />
                     </Link>
                 </motion.div>
             </div>
