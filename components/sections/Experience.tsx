@@ -64,9 +64,16 @@ export function Experience() {
     return (
         <section id="experience" className="py-20 relative z-10">
             <div className="max-w-5xl mx-auto px-6">
-                <h2 className="text-3xl md:text-5xl font-bold text-foreground mb-10 text-center">
+                {/* UPDATED ANIMATION: Title Fade Down */}
+                <motion.h2
+                    initial={{ opacity: 0, y: -20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.6, ease: "easeOut" }}
+                    className="text-3xl md:text-5xl font-bold text-foreground mb-10 text-center"
+                >
                     Experience
-                </h2>
+                </motion.h2>
 
                 {/* Tabs */}
                 <div className="flex justify-center mb-16">
@@ -96,8 +103,8 @@ export function Experience() {
                                     )}
                                     <span
                                         className={`relative z-10 transition-colors ${isActive
-                                                ? "text-black"
-                                                : "text-muted-foreground hover:text-foreground"
+                                            ? "text-black"
+                                            : "text-muted-foreground hover:text-foreground"
                                             }`}
                                     >
                                         {tab.label}
@@ -112,19 +119,26 @@ export function Experience() {
                 <AnimatePresence mode="wait">
                     <motion.div
                         key={activeTab}
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -10 }}
-                        transition={{ duration: 0.3 }}
+                        // UPDATED ANIMATION: Container transition logic
+                        initial={{ opacity: 0, y: 20, filter: "blur(10px)" }}
+                        animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+                        exit={{ opacity: 0, y: -20, filter: "blur(10px)" }}
+                        transition={{ duration: 0.4, ease: "easeOut" }}
                         className="relative border-l border-primary/30 ml-4 md:ml-8 space-y-12"
                     >
                         {data.map((exp, i) => (
                             <motion.div
                                 key={i}
-                                initial={{ opacity: 0, x: -20 }}
+                                // UPDATED ANIMATION: Staggered spring entrance per item
+                                initial={{ opacity: 0, x: -50 }}
                                 whileInView={{ opacity: 1, x: 0 }}
-                                viewport={{ once: true }}
-                                transition={{ delay: i * 0.15 }}
+                                viewport={{ once: true, margin: "-50px" }}
+                                transition={{
+                                    delay: i * 0.2,
+                                    type: "spring",
+                                    stiffness: 50,
+                                    damping: 20
+                                }}
                                 className="relative pl-8 md:pl-12"
                             >
                                 {/* Dot */}
@@ -158,6 +172,33 @@ export function Experience() {
                         ))}
                     </motion.div>
                 </AnimatePresence>
+
+
+                <div className="flex justify-center mt-12">
+                    <a
+                        href="/certificates"
+                        className="group relative inline-flex items-center gap-2 px-6 py-3 bg-muted/20 hover:bg-primary/10 border border-border hover:border-primary/50 rounded-full transition-all duration-300"
+                    >
+                        <span className="text-muted-foreground group-hover:text-primary font-medium transition-colors">
+                            View Certificates
+                        </span>
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="24"
+                            height="24"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            className="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors group-hover:translate-x-1 duration-300"
+                        >
+                            <path d="M5 12h14" />
+                            <path d="m12 5 7 7-7 7" />
+                        </svg>
+                    </a>
+                </div>
             </div>
         </section>
     );
